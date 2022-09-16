@@ -1,7 +1,7 @@
 import telegram
 from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, ConversationHandler
 import logging
-from functions import start, add, delete, remind, list
+from functions import start, add, delete, remind
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                      level=logging.INFO)

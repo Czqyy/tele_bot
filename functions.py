@@ -24,12 +24,10 @@ def remind(update: telegram.Update, context: CallbackContext):
 
 def list(update: telegram.Update, context: CallbackContext):
     # Query db for all birthdays
-    # Connect to db
     con = sqlite3.connect("bday.db")
     cursor = con.cursor()
-
     list = cursor.execute("SELECT Name, Birthdate FROM people")
     
-    
-    while(list[i]):
-        context.bot.send_message(chat_id=update.effective_chat.id, text="", entities=)
+    # Send messages, each being a birthday entry
+    for row in list:
+        context.bot.send_message(chat_id=update.effective_chat.id, text=f"{row[0]}'s birthday: {row[1]}")
