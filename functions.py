@@ -30,6 +30,6 @@ def list(update: telegram.Update, context: CallbackContext):
 
     list = cursor.execute("SELECT Name, Birthdate FROM people")
     
-    i = 0
+    
     while(list[i]):
         context.bot.send_message(chat_id=update.effective_chat.id, text="", entities=)
