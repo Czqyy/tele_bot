@@ -39,7 +39,7 @@ def main():
     convo_handler = ConversationHandler(
         entry_points=[list(commands.values())],
         states={
-            Name: 
+            NAME: 
         }
     )
 
