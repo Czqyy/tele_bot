@@ -26,20 +26,24 @@ def add(name, date):
     #     # Get date
     #     context.bot.send_message(chat_id=update.effective_chat.id, text="Birthdate in the format DDMMYY")
     #     date = update.message.text
- 
-    #     # Add to database
-    con = sqlite3.connect("bday.db")
-    cursor = con.cursor()
-    cursor.execute("INSERT INTO people (Name, Birthdate) VALUES (?, ?)", (name, date))
+    try:
+        # Add to database
+        con = sqlite3.connect("bday.db")
+        cursor = con.cursor()
+        cursor.execute("INSERT INTO people (Name, Birthdate) VALUES (?, ?)", (name, date))
+        con.commit()
+        return True
+    except:
+        return False
 
-def add_date(update: telegram.Update, context: CallbackContext):
-    name = update.message.text
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Date?")
-    MessageHandler(Filters.text, add_action(update, context, name))
+# def add_date(update: telegram.Update, context: CallbackContext):
+#     name = update.message.text
+#     context.bot.send_message(chat_id=update.effective_chat.id, text="Date?")
+#     MessageHandler(Filters.text, add_action(update, context, name))
 
-def add_action(update: telegram.Update, context: CallbackContext, name: str):
-    date = update.message.text
-    context.bot.send_message(chat_id=update.effective_chat.id, text=f"{name} {date}")
+# def add_action(update: telegram.Update, context: CallbackContext, name: str):
+#     date = update.message.text
+#     context.bot.send_message(chat_id=update.effective_chat.id, text=f"{name} {date}")
 
 def delete(update: telegram.Update, context: CallbackContext):
     context.bot.send_message(chat_id=update.effective_chat.id, text="Fuck")

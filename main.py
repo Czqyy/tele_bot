@@ -7,10 +7,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                      level=logging.INFO)
 
 api_key = "5222251611:AAGd36k-EsuArRem-ahHjUo-vGkYwiHO0l4"
-# user_id = "1802361134"
 
-name = ""
-date = ""
 
 def add_name(update: telegram.Update, context: CallbackContext):
     # Get name
@@ -19,6 +16,7 @@ def add_name(update: telegram.Update, context: CallbackContext):
     return 1
 
 def add_date(update: telegram.Update, context: CallbackContext):
+    global name 
     name = update.message.text
     # Get date
     update.message.reply_text("Birthdate in the format DDMMYY")
@@ -28,12 +26,14 @@ def add_date(update: telegram.Update, context: CallbackContext):
 def add_last(update: telegram.Update, context: CallbackContext):
     date = update.message.text
 
-    add(name, date)
+    if add(name, date):
+        update.message.reply_text("Birthday successfully added!")
+        context.bot.send_message(chat_id=update.effective_chat.id, text=f"{name} {date}")
 
+
+    return ConversationHandler.END
 
 def main():
-    # Create bot object
-    #bot = telegram.Bot(token=api_key)
 
     # Create dispatcher
     updater = Updater(token=api_key)
@@ -43,7 +43,6 @@ def main():
     # Dictionary of commands excluding /list
     commands = {
         "start": CommandHandler('start', start),
-        # "add": CommandHandler('add', add),
         "delete": CommandHandler('delete', delete),
         "remind": CommandHandler('remind', remind)
     }
@@ -66,6 +65,7 @@ def main():
                 MessageHandler(Filters.text, add_last)
             ]
         },
+        # NOT FINISHED!
         fallbacks=[CommandHandler("delete", delete)],
     )
 
