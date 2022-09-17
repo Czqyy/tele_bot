@@ -1,6 +1,7 @@
+from ast import Pass
 from html import entities
 import telegram
-from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, ConversationHandler
+from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, ConversationHandler, Filters
 import sqlite3
 
 
@@ -16,15 +17,29 @@ def start(update: telegram.Update, context: CallbackContext):
     "/list - List all existing birthdays", parse_mode=telegram.constants.PARSEMODE_HTML)
 
 
-async def add(update: telegram.Update, context: CallbackContext):
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Name?")
 
-    name = update.message.text 
+def add(name, date):
 
-    await update.message {
-``
-    }
 
+    # if update.effective_message:
+    #     name = update.message.text
+    #     # Get date
+    #     context.bot.send_message(chat_id=update.effective_chat.id, text="Birthdate in the format DDMMYY")
+    #     date = update.message.text
+ 
+    #     # Add to database
+    con = sqlite3.connect("bday.db")
+    cursor = con.cursor()
+    cursor.execute("INSERT INTO people (Name, Birthdate) VALUES (?, ?)", (name, date))
+
+def add_date(update: telegram.Update, context: CallbackContext):
+    name = update.message.text
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Date?")
+    MessageHandler(Filters.text, add_action(update, context, name))
+
+def add_action(update: telegram.Update, context: CallbackContext, name: str):
+    date = update.message.text
+    context.bot.send_message(chat_id=update.effective_chat.id, text=f"{name} {date}")
 
 def delete(update: telegram.Update, context: CallbackContext):
     context.bot.send_message(chat_id=update.effective_chat.id, text="Fuck")
