@@ -1,5 +1,3 @@
-from ast import Pass
-from html import entities
 import telegram
 from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, ConversationHandler, Filters
 import sqlite3
@@ -18,22 +16,34 @@ def start(update: telegram.Update, context: CallbackContext):
 
 
 def add(name, date):    
+    # Connect to database
+    con = sqlite3.connect("bday.db")
+    cursor = con.cursor()
+    
     try:
-        # Add to database
-        con = sqlite3.connect("bday.db")
-        cursor = con.cursor()
+        # Add to db
         cursor.execute("INSERT INTO people (Name, Birthdate) VALUES (?, ?)", (name, date))
         con.commit()
         return True
+    
     except:
         return False
 
 def delete(name: str, date: str):
+    # Connect to db
+    con = sqlite3.connect("bday.db")
+    cursor = con.cursor()
     
+    try:
+        # Delete from db
+        cursor.execute("DELETE FROM people WHERE Name = ? AND Birthdate = ?", (name, date))
+        con.commit()
+        return True
+
+    except:
+        return False
 
 
-
-    
 def remind(update: telegram.Update, context: CallbackContext):
     context.bot.send_message(chat_id=update.effective_chat.id, text="Fuck")
 
@@ -46,8 +56,7 @@ def list(update: telegram.Update, context: CallbackContext):
     # Send messages, each being a birthday entry
     for row in list:
         date = row[1]
-        formatted_date = date[0] + date[1] + "/" + date[2] + date[3]
-        context.bot.send_message(chat_id=update.effective_chat.id, text=f"{formatted_date}: {row[0]}'s birthday")
+        context.bot.send_message(chat_id=update.effective_chat.id, text=f"{format_date(date)}: {row[0]}'s birthday")
 
 
 # Function to check if date is valid, returns true if valid
@@ -59,19 +68,29 @@ def check_date(date: str):
     dd = int(date[0] + date[1])
     mm = int(date[2] + date[3])
 
-    if dd < 1 or dd > 31: 
-        return False
-
-    elif mm < 1 or mm > 12:
-        return False
-
-    # Check for months where last day is 30
-    elif mm in [2, 4, 6, 9, 11]:
-        if dd > 30: 
+    # Ensure date and month in correct range
+    if (0 < dd < 32) and (0 < mm < 13): 
+        # Check for months where last day is 30
+        if mm in [2, 4, 6, 9, 11] and dd == 31:
             return False
 
-    else:
         return True
+
+    return False
 
     
 def find_bday(name: str, date: str):
+    # Connect to db
+    con = sqlite3.connect("bday.db")
+    cursor = con.cursor()
+    person = cursor.execute("SELECT * FROM people WHERE Name = ? AND Birthdate = ?", (name, date)).fetchall()
+    if person:
+        return True
+    else:
+        # Person is an empty list, meaning the data does not exist in db 
+        return False
+
+
+# Formats date from DDMM to DD/MM
+def format_date(date: str):
+    return date[0] + date[1] + '/' + date[2] + date[3]

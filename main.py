@@ -1,7 +1,7 @@
 import telegram
 from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, ConversationHandler, Filters
 import logging
-from functions import start, add, delete, remind, list, check_date, find_bday
+from functions import format_date, start, add, delete, remind, list, check_date, find_bday, format_date
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                      level=logging.INFO)
@@ -41,7 +41,7 @@ def add_last(update: telegram.Update, context: CallbackContext):
             date = data["date"]
 
             # Reply update
-            update.message.reply_text(f"{name}'s birthday on {date} successfully added!")
+            update.message.reply_text(f"{name}'s birthday on {format_date(date)} successfully added!")
             data.clear
             return ConversationHandler.END
 
@@ -59,6 +59,7 @@ def delete_name(update: telegram.Update, context: CallbackContext):
 def delete_date(update: telegram.Update, context: CallbackContext):
     data = context.user_data
     data["name"] = update.message.text
+    
     # Get date
     update.message.reply_text("Birthdate in the format DDMM")
 
@@ -79,12 +80,14 @@ def delete_last(update: telegram.Update, context: CallbackContext):
             date = data["date"]
 
             # Reply update
-            update.message.reply_text(f"{name}'s birthday on {date} deleted.")
+            update.message.reply_text(f"{name}'s birthday on {format_date(date)} deleted.")
             data.clear()
             return ConversationHandler.END
 
         else:
             update.message.reply_text("Deletion unsuccessful! Please try again with /delete")
+            data.clear()
+            return ConversationHandler.END
 
 
 def main():
@@ -107,16 +110,9 @@ def main():
     for command in commands:
         dispatcher.add_handler(commands[command])
     
-    # List of conversation handlers: /add, /delete, /remind
-    convo_handler_list = []
-    convo_handler_list.append(CommandHandler("add", add_name))
-    convo_handler_list.append(CommandHandler('delete', delete_name))
-    convo_handler_list.append(CommandHandler('remind', remind))
-
-
     # /add conversation handler
     add_convohandler = ConversationHandler(
-        entry_points=[convo_handler_list],
+        entry_points=[CommandHandler('add', add_name), CommandHandler('delete', delete_name), CommandHandler('remind', remind)],
         states={
             add_1: [
                 MessageHandler(Filters.text, add_date)
