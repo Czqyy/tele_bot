@@ -17,15 +17,7 @@ def start(update: telegram.Update, context: CallbackContext):
     "/list - List all existing birthdays", parse_mode=telegram.constants.PARSEMODE_HTML)
 
 
-
-def add(name, date):
-
-
-    # if update.effective_message:
-    #     name = update.message.text
-    #     # Get date
-    #     context.bot.send_message(chat_id=update.effective_chat.id, text="Birthdate in the format DDMMYY")
-    #     date = update.message.text
+def add(name, date):    
     try:
         # Add to database
         con = sqlite3.connect("bday.db")
@@ -36,18 +28,12 @@ def add(name, date):
     except:
         return False
 
-# def add_date(update: telegram.Update, context: CallbackContext):
-#     name = update.message.text
-#     context.bot.send_message(chat_id=update.effective_chat.id, text="Date?")
-#     MessageHandler(Filters.text, add_action(update, context, name))
+def delete(name: str, date: str):
+    
 
-# def add_action(update: telegram.Update, context: CallbackContext, name: str):
-#     date = update.message.text
-#     context.bot.send_message(chat_id=update.effective_chat.id, text=f"{name} {date}")
 
-def delete(update: telegram.Update, context: CallbackContext):
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Fuck")
 
+    
 def remind(update: telegram.Update, context: CallbackContext):
     context.bot.send_message(chat_id=update.effective_chat.id, text="Fuck")
 
@@ -59,4 +45,33 @@ def list(update: telegram.Update, context: CallbackContext):
     
     # Send messages, each being a birthday entry
     for row in list:
-        context.bot.send_message(chat_id=update.effective_chat.id, text=f"{row[1]}: {row[0]}'s birthday")
+        date = row[1]
+        formatted_date = date[0] + date[1] + "/" + date[2] + date[3]
+        context.bot.send_message(chat_id=update.effective_chat.id, text=f"{formatted_date}: {row[0]}'s birthday")
+
+
+# Function to check if date is valid, returns true if valid
+def check_date(date: str):
+    # Check length of date str
+    if len(date) != 4:
+        return False
+
+    dd = int(date[0] + date[1])
+    mm = int(date[2] + date[3])
+
+    if dd < 1 or dd > 31: 
+        return False
+
+    elif mm < 1 or mm > 12:
+        return False
+
+    # Check for months where last day is 30
+    elif mm in [2, 4, 6, 9, 11]:
+        if dd > 30: 
+            return False
+
+    else:
+        return True
+
+    
+def find_bday(name: str, date: str):
