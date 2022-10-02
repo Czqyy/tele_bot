@@ -1,7 +1,10 @@
+from re import X
 import telegram
-from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, ConversationHandler, Filters
+from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, ConversationHandler, Filters, JobQueue
 import logging
+import datetime
 from functions import format_date, start, add, delete, remind, list, check_date, find_bday, format_date
+
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                      level=logging.INFO)
@@ -90,6 +93,7 @@ def delete_last(update: telegram.Update, context: CallbackContext):
             return ConversationHandler.END
 
 
+
 def main():
 
     # Create dispatcher
@@ -102,9 +106,6 @@ def main():
         "start": CommandHandler('start', start),
         "list": CommandHandler('list', list)
     }
-
-    # list_handler = CommandHandler('list', list)
-    # dispatcher.add_handler(list_handler) 
 
     # Register /start and /list
     for command in commands:
@@ -127,14 +128,17 @@ def main():
                 MessageHandler(Filters.text, delete_last)
             ]
         },
-        # NOT FINISHED!
-        fallbacks=[CommandHandler("delete", delete)],
+        fallbacks=[],
     )
 
     dispatcher.add_handler(add_convohandler)
 
     # Poll updates from bot
     updater.start_polling()
+
+    # Callback remind function everyday
+    JobQueue().set_dispatcher(dispatcher)
+    JobQueue().run_daily(callback=remind, days=(0, 1, 2, 3, 4, 5, 6), time=datetime.time(hour=00, minute=00, second=00))
 
 if __name__ == '__main__':
     main()
