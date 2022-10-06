@@ -1,5 +1,5 @@
 import telegram
-from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, ConversationHandler, Filters
+from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, ConversationHandler, Filters, Job
 import sqlite3
 import datetime
 
@@ -14,7 +14,7 @@ def start(update: telegram.Update, context: CallbackContext):
     context.bot.send_message(chat_id=update.effective_chat.id, text="<b>Commands</b>: \n" +
     "/add - Add a new birthday \n" +
     "/delete - Delete an existing birthday \n" +
-    "/remind - Set reminder \n" +
+    "/remind - Start reminder function of bot \n" +
     "/list - List all existing birthdays", parse_mode=telegram.constants.PARSEMODE_HTML)
 
 
@@ -46,13 +46,22 @@ def delete(name: str, date: str):
     except:
         return False
 
+def check_bday(context: CallbackContext):
+    # Get current date
+    today = datetime.date.today()
+    ddmm = today.strftime('%d%m')
 
-def remind(update: telegram.Update, context: CallbackContext):
-    # today = datetime.date.today()
-    # ddmm = today.strftime('%d%m')
+    # Connect to database
+    con = sqlite3.connect(db)
+    cursor = con.cursor()
+    name_list = cursor.execute("SELECT Name FROM people WHERE Birthdate = ? ORDER BY Name", (ddmm,)).fetchall()
 
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Fuck")
-
+    # Remind birthday if any
+    if name_list:
+        for row in name_list:
+            name = row[0]
+            context.bot.send_message(chat_id=context.job.context, text=f"Today is {name}'s birthday!")
+    
 
 def list(update: telegram.Update, context: CallbackContext):
     # Query db for all birthdays

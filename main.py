@@ -3,7 +3,7 @@ import telegram
 from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, ConversationHandler, Filters, JobQueue
 import logging
 import datetime
-from functions import format_date, start, add, delete, remind, list, check_date, find_bday, format_date
+from functions import format_date, start, add, delete, list, check_date, find_bday, format_date, check_bday
 
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -92,6 +92,16 @@ def delete_last(update: telegram.Update, context: CallbackContext):
             data.clear()
             return ConversationHandler.END
 
+def remind(update: telegram.Update, context: CallbackContext):
+    chat_id = update.effective_chat.id
+    
+    # For testing purposes
+    # context.job_queue.run_once(callback=check_bday, when=3, context=chat_id)
+
+    # Run check_bday daily
+    context.job_queue.run_daily(callback=check_bday, days=(0, 1, 2, 3, 4, 5, 6), time=datetime.time(hour=0, minute=0, second=00), context=chat_id)
+
+    context.bot.send_message(chat_id=chat_id, text="Reminder activated. I will remind you of any birthdays each day at 0000H.")
 
 
 def main():
@@ -136,9 +146,10 @@ def main():
     # Poll updates from bot
     updater.start_polling()
 
-    # Callback remind function everyday
-    JobQueue().set_dispatcher(dispatcher)
-    JobQueue().run_daily(callback=remind, days=(0, 1, 2, 3, 4, 5, 6), time=datetime.time(hour=00, minute=00, second=00))
+    # Start webhook
+    # updater.start_webhook(listen="0.0.0.0", port=int(PORT), url_path=TOKEN)
+    # updater.bot.setWebhook('https://yourherokuappname.herokuapp.com/' + TOKEN)
 
+    
 if __name__ == '__main__':
     main()
