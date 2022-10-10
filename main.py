@@ -1,6 +1,6 @@
 import os
 import telegram
-from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, ConversationHandler, Filters, JobQueue
+from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, ConversationHandler, Filters
 import logging
 import datetime
 from functions import format_date, start, add, delete, list_bday, check_date, find_bday, format_date, check_bday
