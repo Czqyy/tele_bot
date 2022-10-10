@@ -1,7 +1,10 @@
+from re import X
 import telegram
-from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, ConversationHandler, Filters
+from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, ConversationHandler, Filters, JobQueue
 import logging
-from functions import format_date, start, add, delete, remind, list, check_date, find_bday, format_date
+import datetime
+from functions import format_date, start, add, delete, list, check_date, find_bday, format_date, check_bday
+
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                      level=logging.INFO)
@@ -89,6 +92,17 @@ def delete_last(update: telegram.Update, context: CallbackContext):
             data.clear()
             return ConversationHandler.END
 
+def remind(update: telegram.Update, context: CallbackContext):
+    chat_id = update.effective_chat.id
+    
+    # For testing purposes
+    # context.job_queue.run_once(callback=check_bday, when=3, context=chat_id)
+
+    # Run check_bday daily
+    context.job_queue.run_daily(callback=check_bday, days=(0, 1, 2, 3, 4, 5, 6), time=datetime.time(hour=0, minute=0, second=00), context=chat_id)
+
+    context.bot.send_message(chat_id=chat_id, text="Reminder activated. I will remind you of any birthdays each day at 0000H.")
+
 
 def main():
 
@@ -102,9 +116,6 @@ def main():
         "start": CommandHandler('start', start),
         "list": CommandHandler('list', list)
     }
-
-    # list_handler = CommandHandler('list', list)
-    # dispatcher.add_handler(list_handler) 
 
     # Register /start and /list
     for command in commands:
@@ -127,8 +138,7 @@ def main():
                 MessageHandler(Filters.text, delete_last)
             ]
         },
-        # NOT FINISHED!
-        fallbacks=[CommandHandler("delete", delete)],
+        fallbacks=[],
     )
 
     dispatcher.add_handler(add_convohandler)
@@ -136,5 +146,10 @@ def main():
     # Poll updates from bot
     updater.start_polling()
 
+    # Start webhook
+    # updater.start_webhook(listen="0.0.0.0", port=int(PORT), url_path=TOKEN)
+    # updater.bot.setWebhook('https://yourherokuappname.herokuapp.com/' + TOKEN)
+
+    
 if __name__ == '__main__':
     main()
