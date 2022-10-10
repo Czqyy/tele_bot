@@ -6,6 +6,7 @@ import datetime
 db = "bday.db"
 
 
+# Start message to introduce bot
 def start(update: telegram.Update, context: CallbackContext):
     # Intro text
     context.bot.send_message(chat_id=update.effective_chat.id, text="Hello, I'm a birthday reminder bot. I help you set reminders for birthdays!")
@@ -18,6 +19,7 @@ def start(update: telegram.Update, context: CallbackContext):
     "/list - List all existing birthdays", parse_mode=telegram.constants.PARSEMODE_HTML)
 
 
+# Add bday to bday.db
 def add(name, date):    
     # Connect to database
     con = sqlite3.connect(db)
@@ -32,6 +34,7 @@ def add(name, date):
     except:
         return False
 
+# Delete bday from bday.db
 def delete(name: str, date: str):
     # Connect to db
     con = sqlite3.connect(db)
@@ -46,6 +49,8 @@ def delete(name: str, date: str):
     except:
         return False
 
+
+# Check if current date is someone's bday, if so send reminder
 def check_bday(context: CallbackContext):
     # Get current date
     today = datetime.date.today()
@@ -63,7 +68,8 @@ def check_bday(context: CallbackContext):
             context.bot.send_message(chat_id=context.job.context, text=f"Today is {name}'s birthday!")
     
 
-def list(update: telegram.Update, context: CallbackContext):
+# Send messages listing all bdays in bday.db
+def list_bday(update: telegram.Update, context: CallbackContext):
     # Query db for all birthdays
     con = sqlite3.connect(db)
     cursor = con.cursor()
@@ -75,7 +81,7 @@ def list(update: telegram.Update, context: CallbackContext):
         context.bot.send_message(chat_id=update.effective_chat.id, text=f"{row[0]}'s birthday: {format_date(date)}")
 
 
-# Function to check if date is valid, returns true if valid
+# Check if date is valid, returns true if valid
 def check_date(date: str):
     # Check length of date str
     if len(date) != 4:

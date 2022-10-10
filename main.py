@@ -1,9 +1,9 @@
-from re import X
+import os
 import telegram
 from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, ConversationHandler, Filters, JobQueue
 import logging
 import datetime
-from functions import format_date, start, add, delete, list, check_date, find_bday, format_date, check_bday
+from functions import format_date, start, add, delete, list_bday, check_date, find_bday, format_date, check_bday
 
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -11,15 +11,18 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 api_key = "5222251611:AAGd36k-EsuArRem-ahHjUo-vGkYwiHO0l4"
 
-add_1, add_2, delete_1, delete_2 = range(4)
+add_1, add_2, delete_1, delete_2, remind = range(5)
 
 
+# Starting convo for /add, asking for Name
 def add_name(update: telegram.Update, context: CallbackContext):
     # Get name
     update.message.reply_text("Name?")
 
     return add_1
 
+
+# /add convo, asking for date
 def add_date(update: telegram.Update, context: CallbackContext):
     data = context.user_data
     data["name"] = update.message.text
@@ -28,6 +31,7 @@ def add_date(update: telegram.Update, context: CallbackContext):
 
     return add_2
 
+# Ending convo for /add, adding info to bday.db
 def add_last(update: telegram.Update, context: CallbackContext):
     data = context.user_data
     data["date"] = update.message.text
@@ -53,12 +57,16 @@ def add_last(update: telegram.Update, context: CallbackContext):
             data.clear()
             return ConversationHandler.END
 
+
+# Start convo for /delete, asking for Name
 def delete_name(update: telegram.Update, context: CallbackContext):
     # Get name
     update.message.reply_text("Name?")
 
     return delete_1
 
+
+# /delete convo, asking for date
 def delete_date(update: telegram.Update, context: CallbackContext):
     data = context.user_data
     data["name"] = update.message.text
@@ -68,6 +76,8 @@ def delete_date(update: telegram.Update, context: CallbackContext):
 
     return delete_2
 
+
+# Ending convo for /delete, deleting bday from bday.db
 def delete_last(update: telegram.Update, context: CallbackContext):
     data = context.user_data
     data["date"] = update.message.text
@@ -92,16 +102,45 @@ def delete_last(update: telegram.Update, context: CallbackContext):
             data.clear()
             return ConversationHandler.END
 
-def remind(update: telegram.Update, context: CallbackContext):
+
+# Start convo of /remind, asking for time
+def remind_time(update: telegram.Update, context: CallbackContext):
+    # Get time
+    update.message.reply_text("Time of reminder in HHMM format?")
+
+    return remind
+
+# Set reminder
+def set_reminder(update: telegram.Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     
-    # For testing purposes
-    # context.job_queue.run_once(callback=check_bday, when=3, context=chat_id)
+    # Check validity of message
+    time = update.message.text
 
+    # Check if message is numeric
+    if not time.isnumeric():
+        update.message.reply_text("Please enter numbers only, try again.")
+
+        return remind
+
+    # Format time given
+    hh = int(time[0] + time[1])
+    mm = int(time[2] + time[3])
+
+    # Check validity of time
+    if hh not in list(range(0, 24)) or mm not in list(range(0, 60)):
+        update.message.reply_text("Invalid time given, try again.")
+
+        return remind
+
+    
     # Run check_bday daily
-    context.job_queue.run_daily(callback=check_bday, days=(0, 1, 2, 3, 4, 5, 6), time=datetime.time(hour=0, minute=0, second=00), context=chat_id)
+    context.job_queue.run_daily(callback=check_bday, days=(0, 1, 2, 3, 4, 5, 6), time=datetime.time(hour=hh, minute=mm, second=00), context=chat_id)
 
-    context.bot.send_message(chat_id=chat_id, text="Reminder activated. I will remind you of any birthdays each day at 0000H.")
+    context.bot.send_message(chat_id=chat_id, text=f"Reminder activated. I will remind you of any birthdays each day at {time}H.")
+
+    return ConversationHandler.END
+
 
 
 def main():
@@ -114,7 +153,7 @@ def main():
     # Dictionary of non-conversation commands: /start and /list
     commands = {
         "start": CommandHandler('start', start),
-        "list": CommandHandler('list', list)
+        "list": CommandHandler('list', list_bday)
     }
 
     # Register /start and /list
@@ -123,7 +162,7 @@ def main():
     
     # /add conversation handler
     add_convohandler = ConversationHandler(
-        entry_points=[CommandHandler('add', add_name), CommandHandler('delete', delete_name), CommandHandler('remind', remind)],
+        entry_points=[CommandHandler('add', add_name), CommandHandler('delete', delete_name), CommandHandler('remind', remind_time)],
         states={
             add_1: [
                 MessageHandler(Filters.text, add_date)
@@ -136,9 +175,13 @@ def main():
             ],
             delete_2: [
                 MessageHandler(Filters.text, delete_last)
+            ],
+            remind: [
+                MessageHandler(Filters.text, set_reminder)
             ]
         },
         fallbacks=[],
+        allow_reentry=True
     )
 
     dispatcher.add_handler(add_convohandler)
@@ -147,8 +190,8 @@ def main():
     updater.start_polling()
 
     # Start webhook
-    # updater.start_webhook(listen="0.0.0.0", port=int(PORT), url_path=TOKEN)
-    # updater.bot.setWebhook('https://yourherokuappname.herokuapp.com/' + TOKEN)
+    # updater.start_webhook(listen="0.0.0.0", port=int(os.environ.get('PORT', 5000)), url_path=api_key, webhook_url= + api_key)
+
 
     
 if __name__ == '__main__':
