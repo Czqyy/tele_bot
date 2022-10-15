@@ -194,9 +194,9 @@ def main():
     # updater.start_polling()
 
     # Start webhook
-    updater.start_webhook(listen="0.0.0.0", port=int(os.environ.get('PORT', 5000)), url_path=api_key)
-    updater.bot.set_webhook('https://evening-refuge-42889.herokuapp.com/' + api_key)
-
+    updater.start_webhook(listen="0.0.0.0", port=int(os.environ.get('PORT', 5000)), url_path=api_key, webhook_url='https://evening-refuge-42889.herokuapp.com/' + api_key)
+    
+    updater.idle()
     
 if __name__ == '__main__':
     main()
