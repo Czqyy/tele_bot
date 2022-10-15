@@ -191,11 +191,11 @@ def main():
     dispatcher.add_handler(add_convohandler)
 
     # Poll updates from bot
-    # updater.start_polling()
+    updater.start_polling()
 
     # Start webhook
-    updater.start_webhook(listen="0.0.0.0", port=int(os.environ.get('PORT', 5000)), url_path=api_key)
-    updater.bot.set_webhook('https://evening-refuge-42889.herokuapp.com/' + api_key)
+    # updater.start_webhook(listen="0.0.0.0", port=int(os.environ.get('PORT', 5000)), url_path=api_key)
+    # updater.bot.set_webhook('https://evening-refuge-42889.herokuapp.com/' + api_key)
 
     
 if __name__ == '__main__':
