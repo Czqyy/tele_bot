@@ -133,7 +133,11 @@ def set_reminder(update: telegram.Update, context: CallbackContext):
 
         return remind
 
-    
+    # Convert to local time (UTC+8)
+    hh -= 8
+    if hh < 0:
+        hh += 24
+
     # Run check_bday daily
     context.job_queue.run_daily(callback=check_bday, days=(0, 1, 2, 3, 4, 5, 6), time=datetime.time(hour=hh, minute=mm, second=00), context=chat_id)
 
@@ -187,12 +191,12 @@ def main():
     dispatcher.add_handler(add_convohandler)
 
     # Poll updates from bot
-    updater.start_polling()
+    # updater.start_polling()
 
     # Start webhook
-    # updater.start_webhook(listen="0.0.0.0", port=int(os.environ.get('PORT', 5000)), url_path=api_key, webhook_url= + api_key)
-
+    updater.start_webhook(listen="0.0.0.0", port=int(os.environ.get('PORT', 5000)), url_path=api_key)
+    updater.bot.set_webhook('https://evening-refuge-42889.herokuapp.com/' + api_key)
 
     
 if __name__ == '__main__':
-    main()
+    main()``
