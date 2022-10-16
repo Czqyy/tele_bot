@@ -190,9 +190,6 @@ def main():
 
     dispatcher.add_handler(add_convohandler)
 
-    # Poll updates from bot
-    # updater.start_polling()
-
     # Start webhook
     updater.start_webhook(listen="0.0.0.0", port=int(os.environ.get('PORT', 5000)), url_path=api_key, webhook_url='https://evening-refuge-42889.herokuapp.com/' + api_key)
     

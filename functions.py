@@ -73,12 +73,17 @@ def list_bday(update: telegram.Update, context: CallbackContext):
     # Query db for all birthdays
     con = sqlite3.connect(db)
     cursor = con.cursor()
-    list = cursor.execute("SELECT Name, Birthdate FROM people ORDER BY Name")
+    list = cursor.execute("SELECT Name, Birthdate FROM people ORDER BY Name").fetchall()
     
     # Send messages, each being a birthday entry in alphabetical order
-    for row in list:
-        date = row[1]
-        context.bot.send_message(chat_id=update.effective_chat.id, text=f"{row[0]}'s birthday: {format_date(date)}")
+    if list:
+        for row in list:
+            date = row[1]
+            context.bot.send_message(chat_id=update.effective_chat.id, text=f"{row[0]}'s birthday: {format_date(date)}")
+        
+    else:
+        context.bot.send_message(chat_id=update.effective_chat.id, text="There are no birthdays added! To add birthdays, use /add")
+
 
 
 # Check if date is valid, returns true if valid
