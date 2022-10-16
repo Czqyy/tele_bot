@@ -37,7 +37,7 @@ This bot is hosted on the cloud hosting service Heroku. Unfortunately, as this b
 
 <br>
 
-The telebot_project folder contains the 2 python files, main.py and functions.py. The main.py file contains the main function and some functions to handle the bot conversations involved in /add, /delete and /remind. The functions.py file contains functions that connect to the SQL database bday.db and also format dates and times in the relevant format. 
+The telebot_project folder contains the 2 python files, main.py and functions.py. The main.py file contains the main function and some functions to handle the bot conversations involved in /add, /delete and /remind. How the bot gets updates from users is through the use of a webhook that listens for any updates from the user. Whatever message or command received given by the user is then handled by the bot using command and message handlers which are included in the python-telegram-bot package. The functions.py file contains functions that connect to the SQL database bday.db and also format dates and times in the relevant format. 
 
 <br>
 

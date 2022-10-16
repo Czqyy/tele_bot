@@ -9,7 +9,7 @@ from functions import format_date, start, add, delete, list_bday, check_date, fi
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                      level=logging.INFO)
 
-api_key = "5222251611:AAGd36k-EsuArRem-ahHjUo-vGkYwiHO0l4"
+api_key = ""
 
 add_1, add_2, delete_1, delete_2, remind = range(5)
 
