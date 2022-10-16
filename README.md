@@ -1,6 +1,6 @@
 # Telegram Birthday Bot
 A telegram bot that allows users to keep track of birthdays. The bot is written in python using the python-telegram-bot package and keeps track of birthdays using a SQL database. 
-## Video Demo: <URL>
+## Video Demo: <https://youtu.be/01dTjucdxwc>
 ### **List of bot commands:**
 - /start
 - /add
