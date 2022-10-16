@@ -9,6 +9,7 @@ from functions import format_date, start, add, delete, list_bday, check_date, fi
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                      level=logging.INFO)
 
+# API_KEY is given by Telegram's BotFather
 api_key = ""
 
 add_1, add_2, delete_1, delete_2, remind = range(5)
@@ -191,7 +192,8 @@ def main():
     dispatcher.add_handler(add_convohandler)
 
     # Start webhook
-    updater.start_webhook(listen="0.0.0.0", port=int(os.environ.get('PORT', 5000)), url_path=api_key, webhook_url='https://evening-refuge-42889.herokuapp.com/' + api_key)
+    # webhook_url is given by Heroku after registering for an account
+    updater.start_webhook(listen="0.0.0.0", port=int(os.environ.get('PORT', 5000)), url_path=api_key, webhook_url='URL' + api_key)
     
     updater.idle()
     
